@@ -1,6 +1,4 @@
-Offline-First Learning Management System for Rural & Remote Schools
-
-Beacon LMS is a lightweight, resilient, offline-first educational platform purpose-built for rural classrooms, solar-powered computer labs, and remote learning environments with zero or intermittent internet connectivity.
+Offline-First Learning Management System for Rural & Remote Areas :offline LMS is a lightweight, resilient, offline-first educational platform purpose-built for rural classrooms, solar-powered computer labs, and remote learning environments with zero or intermittent internet connectivity.
 
 ---
 
