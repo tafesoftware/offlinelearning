@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS users (
     full_name TEXT NOT NULL,
     role TEXT NOT NULL CHECK(role IN ('admin', 'teacher', 'student')),
     grade_level TEXT DEFAULT 'General',
+    stream TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -149,6 +150,10 @@ def init_db():
         conn.executescript(SCHEMA_SQL)
         # Seed default school settings if not present
         cursor = conn.cursor()
+        user_columns = {row["name"] for row in cursor.execute("PRAGMA table_info(users)")}
+        if "stream" not in user_columns:
+            cursor.execute("ALTER TABLE users ADD COLUMN stream TEXT")
+
         cursor.execute("SELECT COUNT(*) as cnt FROM school_settings")
         if cursor.fetchone()["cnt"] == 0:
             cursor.execute("INSERT INTO school_settings (key, value) VALUES (?, ?)", 

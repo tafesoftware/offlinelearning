@@ -25,6 +25,9 @@ Offline-First Learning Management System for Rural & Remote Areas :offline LMS i
 5. **Audio-Assisted Learning**:
    - Integrated text-to-speech audio reader summarizes key concepts for auditory learners and students developing reading fluency.
 
+6. **Grade 11-12 Stream Registration**:
+   - Students and teachers choose Natural Science or Social Science, then see the matching subjects and common subjects before completing registration.
+
 ---
 
 ## 🚀 Quick Start Guide

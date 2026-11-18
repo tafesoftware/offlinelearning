@@ -1,6 +1,7 @@
 import unittest
 import json
 import os
+import sqlite3
 import tempfile
 from app import create_app
 from app.config import Config
@@ -115,6 +116,88 @@ class BeaconLMSTestCase(unittest.TestCase):
                 response = self.client.get(path)
                 self.assertEqual(response.status_code, 200)
                 self.assertIn(expected_text, response.data)
+
+    def test_registration_streams_and_subject_preview(self):
+        seed_grade_11_12_subject_catalog()
+        registration = self.client.get("/auth/register")
+        self.assertIn(b'id="stream"', registration.data)
+        self.assertIn(b"Biology", registration.data)
+        self.assertIn(b"Geography", registration.data)
+        self.assertNotIn(b"Student Textbook", registration.data)
+
+        registrations = (
+            ("grade11_student", "student", "Grade 11", "Social Science"),
+            ("grade12_teacher", "teacher", "Grade 12", "Natural Science"),
+        )
+        for username, role, grade, stream in registrations:
+            response = self.client.post("/auth/register", data={
+                "first_name": "Test",
+                "last_name": username,
+                "username": username,
+                "password": "test-password",
+                "role": role,
+                "grade_level": grade,
+                "stream": stream,
+            })
+            self.assertEqual(response.status_code, 302)
+            with db_session() as conn:
+                user = conn.execute(
+                    "SELECT grade_level, stream FROM users WHERE username = ?",
+                    (username,),
+                ).fetchone()
+                self.assertEqual(user["grade_level"], grade)
+                self.assertEqual(user["stream"], stream)
+
+        response = self.client.post("/auth/register", data={
+            "first_name": "Missing",
+            "last_name": "Stream",
+            "username": "missing_stream",
+            "password": "test-password",
+            "role": "student",
+            "grade_level": "Grade 11",
+        })
+        self.assertEqual(response.status_code, 200)
+        with db_session() as conn:
+            user = conn.execute(
+                "SELECT id FROM users WHERE username = ?",
+                ("missing_stream",),
+            ).fetchone()
+            self.assertIsNone(user)
+
+    def test_database_adds_stream_to_existing_users_table(self):
+        original_database = Config.DATABASE
+        test_database = os.path.join(tempfile.gettempdir(), f"beacon_migration_test_{os.urandom(8).hex()}.db")
+        try:
+            Config.DATABASE = test_database
+            conn = sqlite3.connect(test_database)
+            try:
+                conn.execute("""
+                    CREATE TABLE users (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        username TEXT UNIQUE NOT NULL,
+                        password_hash TEXT NOT NULL,
+                        full_name TEXT NOT NULL,
+                        role TEXT NOT NULL CHECK(role IN ('admin', 'teacher', 'student')),
+                        grade_level TEXT DEFAULT 'General',
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                """)
+            finally:
+                conn.close()
+
+            init_db()
+
+            with db_session() as conn:
+                columns = {
+                    row["name"] for row in conn.execute("PRAGMA table_info(users)")
+                }
+                self.assertIn("stream", columns)
+        finally:
+            Config.DATABASE = original_database
+            for suffix in ("", "-wal", "-shm"):
+                path = test_database + suffix
+                if os.path.exists(path):
+                    os.remove(path)
 
     def test_grade_11_12_subject_catalog(self):
         seed_grade_11_12_subject_catalog()

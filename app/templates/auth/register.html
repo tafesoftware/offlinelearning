@@ -49,6 +49,20 @@
           </select>
         </div>
 
+        <div class="form-group" id="stream-group" hidden>
+          <label class="form-label" for="stream">Grades 11-12 Field</label>
+          <select id="stream" name="stream" class="form-control" disabled>
+            <option value="">Choose a field</option>
+            <option value="Natural Science">Natural Science</option>
+            <option value="Social Science">Social Science</option>
+          </select>
+        </div>
+
+        <div class="form-group" id="subject-preview" hidden aria-live="polite">
+          <p class="form-label" id="subject-preview-label">Subjects for selected field</p>
+          <ul id="stream-subject-list" style="margin-left: 1.25rem;"></ul>
+        </div>
+
         <div class="form-group">
           <label class="form-label" for="password">Password / PIN</label>
           <input type="password" id="password" name="password" class="form-control" placeholder="Create a password" required>
@@ -62,4 +76,56 @@
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  (() => {
+    const gradeLevel = document.getElementById('grade_level');
+    const streamGroup = document.getElementById('stream-group');
+    const streamSelect = document.getElementById('stream');
+    const subjectPreview = document.getElementById('subject-preview');
+    const subjectPreviewLabel = document.getElementById('subject-preview-label');
+    const subjectList = document.getElementById('stream-subject-list');
+    const subjects = {{ registration_subjects|tojson }};
+
+    function updateStreamSubjects() {
+      const grade = gradeLevel.value;
+      const isSeniorGrade = grade === 'Grade 11' || grade === 'Grade 12';
+      streamGroup.hidden = !isSeniorGrade;
+      streamSelect.disabled = !isSeniorGrade;
+      streamSelect.required = isSeniorGrade;
+      subjectPreview.hidden = true;
+      while (subjectList.firstChild) {
+        subjectList.removeChild(subjectList.firstChild);
+      }
+
+      if (!isSeniorGrade || !streamSelect.value) {
+        return;
+      }
+
+      const visibleSubjects = subjects.filter(subject =>
+        subject.grade_level === grade &&
+        (subject.stream === streamSelect.value || subject.stream === 'Common')
+      );
+      subjectPreviewLabel.textContent = `${grade} ${streamSelect.value} subjects`;
+      if (visibleSubjects.length === 0) {
+        const item = document.createElement('li');
+        item.textContent = 'No subjects are available for this field yet.';
+        subjectList.appendChild(item);
+      } else {
+        visibleSubjects.forEach(subject => {
+          const item = document.createElement('li');
+          item.textContent = subject.name + (subject.stream === 'Common' ? ' (Common)' : '');
+          subjectList.appendChild(item);
+        });
+      }
+      subjectPreview.hidden = false;
+    }
+
+    gradeLevel.addEventListener('change', updateStreamSubjects);
+    streamSelect.addEventListener('change', updateStreamSubjects);
+    updateStreamSubjects();
+  })();
+</script>
 {% endblock %}
