@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% block title %}{{ subject.title }} - Offline LMS{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="mb-3">
+    <a href="{{ url_for('student.dashboard') }}" class="text-sm text-muted">&larr; Back to Dashboard</a>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-body">
+      <div class="d-flex justify-between align-center mb-2">
+        <div>
+          <span class="badge badge-primary">{{ subject.code }}</span>
+          <span class="badge badge-secondary">{{ subject.grade_level }}</span>
+        </div>
+        {% if session.get('role') in ['teacher', 'admin'] %}
+          <div class="d-flex gap-1">
+            <a href="{{ url_for('teacher.new_lesson', subject_id=subject.id) }}" class="btn btn-primary text-sm">+ Add Lesson</a>
+            <a href="{{ url_for('teacher.new_quiz', subject_id=subject.id) }}" class="btn btn-secondary text-sm">+ Add Quiz</a>
+          </div>
+        {% endif %}
+      </div>
+      <h2>{{ subject.title }}</h2>
+      <p class="text-muted mt-2">{{ subject.description }}</p>
+    </div>
+  </div>
+
+  <h3 class="mb-3">📖 Course Lessons</h3>
+  <div class="card mb-4">
+    <div class="card-body" style="padding: 0;">
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th style="width: 50px;">#</th>
+              <th>Lesson Title</th>
+              <th>Est. Time</th>
+              <th>Status</th>
+              <th style="text-align: right;">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for l in lessons %}
+              <tr>
+                <td><strong>{{ l.order_num }}</strong></td>
+                <td>
+                  <strong>{{ l.title }}</strong>
+                  {% if l.summary %}
+                    <p class="text-xs text-muted" style="margin: 0.2rem 0 0 0; font-size:0.85rem;">{{ l.summary }}</p>
+                  {% endif %}
+                </td>
+                <td class="text-muted text-sm">⏱ {{ l.estimated_minutes }} mins</td>
+                <td>
+                  {% if l.is_completed %}
+                    <span class="badge badge-success">✓ Completed</span>
+                  {% else %}
+                    <span class="badge badge-secondary">Pending</span>
+                  {% endif %}
+                </td>
+                <td style="text-align: right;">
+                  <a href="{{ url_for('student.lesson_view', lesson_id=l.id) }}" class="btn btn-primary text-sm" style="padding: 0.35rem 0.75rem;">
+                    Start Lesson &rarr;
+                  </a>
+                  {% if session.get('role') in ['teacher', 'admin'] %}
+                    <a href="{{ url_for('teacher.edit_lesson', lesson_id=l.id) }}" class="btn btn-secondary text-sm" style="padding: 0.35rem 0.5rem;">Edit</a>
+                  {% endif %}
+                </td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="5" class="text-center text-muted" style="padding: 2rem;">
+                  This subject is listed in the catalog, but its textbook or lessons have not been added yet.
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  {% if general_quizzes %}
+    <h3 class="mb-3">✍️ Module Tests & Quizzes</h3>
+    <div class="grid grid-cols-2 mb-4">
+      {% for qz in general_quizzes %}
+        <div class="card">
+          <div class="card-header">
+            <span>{{ qz.title }}</span>
+            <span class="badge badge-primary">{{ qz.question_count }} Questions</span>
+          </div>
+          <div class="card-body">
+            <p class="text-sm text-muted mb-2">{{ qz.description or 'Test your knowledge on this module.' }}</p>
+            <div class="d-flex justify-between text-sm">
+              <span>Passing Score: <strong>{{ qz.passing_score }}%</strong></span>
+              {% if qz.best_score is not none %}
+                <span class="badge badge-success">Best: {{ qz.best_score }}%</span>
+              {% else %}
+                <span class="badge badge-secondary">Not Attempted</span>
+              {% endif %}
+            </div>
+          </div>
+          <div class="card-footer" style="text-align: right;">
+            <a href="{{ url_for('student.quiz_view', quiz_id=qz.id) }}" class="btn btn-primary text-sm">
+              {% if qz.best_score is not none %}Retake Quiz{% else %}Take Quiz{% endif %} &rarr;
+            </a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

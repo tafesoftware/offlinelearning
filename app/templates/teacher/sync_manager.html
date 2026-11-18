@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% block title %}Sneakernet & Sync Console - Offline LMS{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="mb-3">
+    <a href="{{ url_for('teacher.dashboard') }}" class="text-sm text-muted">&larr; Back to Teacher Hub</a>
+  </div>
+
+  <div class="card mb-4" style="background: linear-gradient(135deg, #0f172a, #1e293b); color: #fff;">
+    <div class="card-body">
+      <h1 style="font-size: 1.8rem;" class="mb-1">💾 Sneakernet & Data Sync Console</h1>
+      <p style="opacity: 0.85;" class="text-sm">
+        Exchange academic records and new curriculum using portable USB thumb drives when internet is unavailable.
+      </p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 mb-4">
+    <!-- Sneakernet Export Card -->
+    <div class="card">
+      <div class="card-header">
+        <span>📤 1. Export School Sync Bundle (USB Outbound)</span>
+      </div>
+      <div class="card-body">
+        <p class="text-sm text-muted mb-3">
+          Creates a cryptographic JSON bundle containing all student submissions, lesson completions, and attendance logs. Save this file onto a USB flash drive and take it to the district office or closest internet connection.
+        </p>
+        <div style="background: var(--bg-main); padding: 0.75rem; border-radius: var(--radius-sm); margin-bottom: 1rem;" class="text-sm">
+          <div>School: <strong>{{ settings.get('school_name', 'Rural School') }}</strong></div>
+          <div>District: <strong>{{ settings.get('district', 'District North') }}</strong></div>
+          <div>Total Submissions to Export: <strong>{{ total_submissions }}</strong> ({{ offline_submissions }} from offline student devices)</div>
+        </div>
+        <a href="{{ url_for('sync.export_bundle') }}" class="btn btn-primary btn-block">
+          💾 Download Sync Bundle to USB (.beacon.json)
+        </a>
+      </div>
+    </div>
+
+    <!-- Sneakernet Import Card -->
+    <div class="card">
+      <div class="card-header">
+        <span>📥 2. Import Curriculum Pack (USB Inbound)</span>
+      </div>
+      <div class="card-body">
+        <p class="text-sm text-muted mb-3">
+          Load new textbooks, interactive lessons, and quiz banks provided by your district office or Ministry of Education via USB drive.
+        </p>
+        <form method="POST" action="{{ url_for('sync.import_pack') }}" enctype="multipart/form-data">
+          <div class="form-group">
+            <label class="form-label" for="pack_file">Select Curriculum Pack File (.json / .pack)</label>
+            <input type="file" id="pack_file" name="pack_file" class="form-control" accept=".json,.pack" required>
+          </div>
+          <button type="submit" class="btn btn-success btn-block">
+            📥 Import Curriculum Pack to School Server
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sync Activity & Audit Logs -->
+  <div class="card mb-4">
+    <div class="card-header d-flex justify-between align-center">
+      <span>📜 Synchronization Audit Trail</span>
+      <span class="badge badge-secondary">{{ logs|length }} Logs</span>
+    </div>
+    <div class="card-body" style="padding: 0;">
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Status</th>
+              <th>Items</th>
+              <th>Source / Origin</th>
+              <th>Details</th>
+              <th>Timestamp</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for log in logs %}
+              <tr>
+                <td>
+                  {% if log.sync_type == 'sneakernet_export' %}
+                    <span class="badge badge-primary">USB Export</span>
+                  {% elif log.sync_type == 'sneakernet_import' %}
+                    <span class="badge badge-success">USB Import</span>
+                  {% elif log.sync_type == 'client_push' %}
+                    <span class="badge badge-secondary">Student PWA Sync</span>
+                  {% else %}
+                    <span class="badge badge-warning">{{ log.sync_type }}</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <span class="badge {% if log.status == 'SUCCESS' %}badge-success{% else %}badge-warning{% endif %}">
+                    {{ log.status }}
+                  </span>
+                </td>
+                <td><strong>{{ log.items_synced }}</strong></td>
+                <td>{{ log.source_info }}</td>
+                <td class="text-xs text-muted">{{ log.log_details }}</td>
+                <td class="text-xs text-muted">{{ log.timestamp }}</td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="6" class="text-center text-muted" style="padding: 2rem;">
+                  No sync events recorded yet.
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

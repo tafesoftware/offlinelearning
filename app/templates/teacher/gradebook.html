@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block title %}Class Gradebook - Offline LMS{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="mb-3 d-flex justify-between align-center">
+    <a href="{{ url_for('teacher.dashboard') }}" class="text-sm text-muted">&larr; Back to Teacher Hub</a>
+    <a href="{{ url_for('sync.export_bundle') }}" class="btn btn-secondary text-sm">📥 Export Gradebook to USB</a>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-header d-flex justify-between align-center">
+      <h2>📊 Student Assessment Gradebook</h2>
+      <span class="badge badge-primary">{{ submissions|length }} Total Records</span>
+    </div>
+    <div class="card-body" style="padding: 0;">
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Student Name</th>
+              <th>Class / Grade</th>
+              <th>Subject</th>
+              <th>Quiz Title</th>
+              <th>Score</th>
+              <th>Status</th>
+              <th>Origin</th>
+              <th>Recorded Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for sub in submissions %}
+              <tr>
+                <td><strong>{{ sub.student_name }}</strong> ({{ sub.student_username }})</td>
+                <td><span class="badge badge-secondary">{{ sub.grade_level }}</span></td>
+                <td>{{ sub.subject_title }}</td>
+                <td>{{ sub.quiz_title }}</td>
+                <td>
+                  <strong>{{ sub.score }} / {{ sub.total_points }}</strong>
+                  <span class="text-muted text-xs">({{ sub.percentage }}%)</span>
+                </td>
+                <td>
+                  {% if sub.passed %}
+                    <span class="badge badge-success">Passed</span>
+                  {% else %}
+                    <span class="badge badge-warning">Needs Help</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if sub.submitted_offline %}
+                    <span class="badge badge-secondary" title="Taken offline at home, synced via hub/sneakernet">💾 Offline Synced</span>
+                  {% else %}
+                    <span class="badge badge-primary">🌐 Direct Hub</span>
+                  {% endif %}
+                </td>
+                <td class="text-xs text-muted">{{ sub.synced_at }}</td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="8" class="text-center text-muted" style="padding: 2.5rem;">
+                  No student quiz submissions recorded yet. Once students take quizzes, results will appear here.
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

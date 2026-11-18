@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}Sign In - Offline LMS{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 440px; margin-top: 3rem;">
+  <div class="card">
+    <div class="card-header text-center" style="display:block; padding: 1.5rem 1rem;">
+      <img src="{{ url_for('static', filename='icons/ministry-of-education.png') }}" width="48" height="48" alt="Ethiopian Ministry of Education logo" class="mb-2">
+      <h2>Offline LMS</h2>
+      <p class="text-muted text-sm">Rural & Remote School Learning System</p>
+    </div>
+    <div class="card-body">
+      <form method="POST" action="{{ url_for('auth.login') }}">
+        <div class="form-group">
+          <label class="form-label" for="username">Username or Student ID</label>
+          <input type="text" id="username" name="username" class="form-control" placeholder="Enter username or ID" required autofocus>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="password">Password / PIN</label>
+          <input type="password" id="password" name="password" class="form-control" placeholder="Enter password" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+      </form>
+    </div>
+    <div class="card-footer text-center">
+      <p class="text-sm">New student or teacher? <a href="{{ url_for('auth.register') }}">Create an account</a></p>
+    </div>
+  </div>
+</div>
+{% endblock %}

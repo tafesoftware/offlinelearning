@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% block title %}{{ book.title }} - Ethiopian Digital Library{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 900px;">
+  <div class="mb-3 d-flex justify-between align-center">
+    <a href="{{ url_for('library.index') }}" class="text-sm text-muted">
+      &larr; Back to Textbook Library
+    </a>
+    <div class="d-flex align-center gap-1">
+      <span class="badge badge-primary">{{ book.grade_level }}</span>
+      <span class="badge badge-secondary">{{ book.subject_code }}</span>
+      {% if book.stream != 'Common' %}
+        <span class="badge badge-success">{{ book.stream }}</span>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Book Header Card -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <div class="d-flex justify-between align-center mb-2" style="flex-wrap: wrap; gap: 0.5rem;">
+        <div>
+          <span class="text-xs text-muted">FEDERAL DEMOCRATIC REPUBLIC OF ETHIOPIA &bull; MINISTRY OF EDUCATION</span>
+        </div>
+        <div>
+          <a href="{{ url_for('library.download_book', book_id=book.id) }}" class="btn btn-primary text-sm">
+            📥 Download Offline Copy
+          </a>
+        </div>
+      </div>
+      <h1 style="font-size: 1.8rem;" class="mb-1">{{ book.title }}</h1>
+      <p class="text-muted text-sm mb-3">
+        <strong>Curriculum:</strong> {{ book.curriculum_type }} &bull; <strong>Edition:</strong> {{ book.edition_year }} &bull; <strong>Publisher:</strong> {{ book.publisher }}
+      </p>
+      <div style="background: var(--bg-main); padding: 0.75rem 1rem; border-radius: var(--radius-sm); border: 1px solid var(--border);" class="text-sm">
+        <strong>Curriculum Overview:</strong> {{ book.description }}
+      </div>
+    </div>
+  </div>
+
+  <!-- If official PDF is available on disk, embed it directly -->
+  {% if book.file_path %}
+    <div class="card mb-4">
+      <div class="card-header d-flex justify-between align-center">
+        <span>📄 Official PDF Document Reader ({{ book.file_size_mb }} MB)</span>
+        <a href="{{ url_for('static', filename='../data/uploads/' + book.file_path) }}" target="_blank" class="text-xs">Open in New Tab &nearr;</a>
+      </div>
+      <div class="card-body" style="padding: 0;">
+        <embed src="{{ url_for('library.download_book', book_id=book.id) }}" type="application/pdf" width="100%" height="700px" style="border:none;" />
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- Interactive Unit Lessons & Key Notes -->
+  {% if lessons %}
+    <h2 class="mb-3">📚 Textbook Units & Companion Modules</h2>
+    <div class="d-flex flex-column gap-2 mb-4">
+      {% for l in lessons %}
+        <div class="card">
+          <div class="card-header d-flex justify-between align-center">
+            <strong>{{ l.title }}</strong>
+            <span class="text-xs text-muted">~{{ l.estimated_minutes }} mins study time</span>
+          </div>
+          <div class="card-body">
+            {% if l.summary %}
+              <div class="mb-3" style="background: var(--primary-light); padding: 0.6rem 0.8rem; border-radius: var(--radius-sm); font-size: 0.9rem;">
+                <strong>Key Competency Summary:</strong> {{ l.summary }}
+              </div>
+            {% endif %}
+
+            <div class="lesson-body text-sm" style="max-height: 400px; overflow-y: auto; padding-right: 0.5rem;">
+              {% for p in l.content_markdown.split('\n\n') %}
+                {% if p.startswith('### ') %}
+                  <h4>{{ p[4:] }}</h4>
+                {% elif p.startswith('## ') %}
+                  <h3>{{ p[3:] }}</h3>
+                {% elif p.startswith('# ') %}
+                  <h2>{{ p[2:] }}</h2>
+                {% elif p.startswith('- ') or p.startswith('* ') %}
+                  <ul>
+                    {% for line in p.split('\n') %}
+                      {% if line.strip() %}<li>{{ line.lstrip('*- ') }}</li>{% endif %}
+                    {% endfor %}
+                  </ul>
+                {% else %}
+                  <p>{{ p }}</p>
+                {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+          <div class="card-footer d-flex justify-between align-center">
+            <span class="text-xs text-muted">Available in offline mode without internet</span>
+            <a href="{{ url_for('student.lesson_view', lesson_id=l.id) }}" class="btn btn-primary text-sm" style="padding: 0.3rem 0.6rem;">
+              Open Full Lesson & Practice Questions &rarr;
+            </a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

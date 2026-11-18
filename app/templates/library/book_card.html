@@ -1,0 +1,50 @@
+<div class="card" style="display:flex; flex-direction:column; justify-content:space-between;">
+  <div class="card-header d-flex justify-between align-center">
+    <div>
+      <span class="badge badge-primary">{{ b.grade_level }}</span>
+      <span class="badge badge-secondary">{{ b.subject_code }}</span>
+      {% if b.stream == 'Natural Science' %}
+        <span class="badge badge-success">Natural Science</span>
+      {% elif b.stream == 'Social Science' %}
+        <span class="badge badge-warning">Social Science</span>
+      {% else %}
+        <span class="badge badge-secondary">Core / Common</span>
+      {% endif %}
+    </div>
+    <span class="text-xs text-muted">~{{ b.file_size_mb }} MB</span>
+  </div>
+
+  <div class="card-body">
+    <h3 class="mb-1" style="font-size: 1.15rem;">{{ b.title }}</h3>
+    <p class="text-xs text-muted mb-2">
+      <strong>Publisher:</strong> {{ b.publisher }} &bull; <em>{{ b.edition_year }}</em>
+    </p>
+    <p class="text-sm text-muted mb-3" style="line-height: 1.5;">
+      {{ b.description }}
+    </p>
+  </div>
+
+  <div class="card-footer d-flex justify-between align-center">
+    <div class="d-flex align-center gap-1">
+      {% if b.file_path %}
+        <span class="badge badge-success" title="Full PDF uploaded on local server">✓ Official PDF ({{ b.file_size_mb }} MB)</span>
+      {% elif b.has_lessons %}
+        <span class="badge badge-secondary" title="Interactive lessons are available">📖 Interactive Reader</span>
+      {% else %}
+        <span class="badge badge-secondary" title="Textbook and lessons have not been added">Subject listing - content not uploaded</span>
+      {% endif %}
+    </div>
+    <div class="d-flex gap-1">
+      {% if b.file_path or b.has_lessons %}
+        <a href="{{ url_for('library.reader', book_id=b.id) }}" class="btn btn-secondary text-sm" style="padding: 0.35rem 0.65rem;">
+          📖 Read Book
+        </a>
+      {% endif %}
+      {% if b.file_path %}
+        <a href="{{ url_for('library.download_book', book_id=b.id) }}" class="btn btn-primary text-sm" style="padding: 0.35rem 0.65rem;">
+          📥 Download
+        </a>
+      {% endif %}
+    </div>
+  </div>
+</div>

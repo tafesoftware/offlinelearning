@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}Upload Textbook - Ethiopian Digital Library{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 650px;">
+  <div class="mb-3">
+    <a href="{{ url_for('library.index') }}" class="text-sm text-muted">&larr; Back to Textbook Library</a>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h2>Upload Textbook to School Library</h2>
+    </div>
+    <div class="card-body">
+      <form method="POST" action="{{ url_for('library.upload_book') }}" enctype="multipart/form-data">
+        <div class="form-group">
+          <label class="form-label" for="title">Book Title</label>
+          <input type="text" id="title" name="title" class="form-control" placeholder="e.g. Ethiopian Grade 10 Chemistry Student Textbook" required>
+        </div>
+
+        <div class="grid grid-cols-2" style="gap: 1rem;">
+          <div class="form-group">
+            <label class="form-label" for="subject_code">Subject Code</label>
+            <input type="text" id="subject_code" name="subject_code" class="form-control" placeholder="e.g. CHEM-10" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="grade_level">Grade Level</label>
+            <select id="grade_level" name="grade_level" class="form-control">
+              <option value="Grade 9">Grade 9</option>
+              <option value="Grade 10">Grade 10</option>
+              <option value="Grade 11">Grade 11</option>
+              <option value="Grade 12">Grade 12</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2" style="gap: 1rem;">
+          <div class="form-group">
+            <label class="form-label" for="stream">Curriculum Stream</label>
+            <select id="stream" name="stream" class="form-control">
+              <option value="Common" selected>Common / General Secondary</option>
+              <option value="Natural Science">Natural Science Stream</option>
+              <option value="Social Science">Social Science Stream</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="publisher">Publisher / Authority</label>
+            <input type="text" id="publisher" name="publisher" class="form-control" value="Ministry of Education (MoE) Ethiopia" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="description">Curriculum Units & Overview</label>
+          <textarea id="description" name="description" class="form-control" rows="3" placeholder="Outline of units and topics covered according to the Ethiopian New Curriculum..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="book_file">Select Textbook PDF File (.pdf)</label>
+          <input type="file" id="book_file" name="book_file" class="form-control" accept=".pdf">
+          <p class="text-xs text-muted mt-1">Upload the official PDF file to store it locally on the school micro-server for offline student downloads.</p>
+        </div>
+
+        <div class="d-flex justify-between align-center mt-4">
+          <a href="{{ url_for('library.index') }}" class="btn btn-secondary">Cancel</a>
+          <button type="submit" class="btn btn-primary">Save & Register Book</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

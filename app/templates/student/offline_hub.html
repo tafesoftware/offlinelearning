@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+{% block title %}Offline Hub - Offline LMS{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 860px;">
+  <div class="mb-3">
+    <a href="{{ url_for('student.dashboard') }}" class="text-sm text-muted">&larr; Back to Dashboard</a>
+  </div>
+
+  <div class="card mb-4" style="background: linear-gradient(135deg, #0284c7, #0369a1); color: #fff;">
+    <div class="card-body">
+      <h1 style="font-size: 1.8rem;" class="mb-1">📲 Offline Hub</h1>
+      <p style="opacity: 0.9;" class="text-sm">
+        Prepare your phone, tablet, or laptop for home study with zero internet.
+      </p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 mb-4">
+    <!-- Download Pack Card -->
+    <div class="card">
+      <div class="card-header">
+        <span>📥 Download Curriculum</span>
+      </div>
+      <div class="card-body">
+        <p class="text-sm text-muted mb-3">
+          Download all lessons, notes, and quiz questions into your browser's local memory. You can continue reading and answering quizzes at home completely disconnected.
+        </p>
+        <div id="download-progress-text" class="text-sm mb-2 text-muted" style="display:none;"></div>
+        <button id="download-curriculum-btn" onclick="startCurriculumDownload()" class="btn btn-primary btn-block">
+          Download All Courses for Offline Study
+        </button>
+      </div>
+      <div class="card-footer">
+        <span class="text-xs text-muted" id="offline-subjects-count">Checking cached courses...</span>
+      </div>
+    </div>
+
+    <!-- Outbox Sync Card -->
+    <div class="card">
+      <div class="card-header d-flex justify-between align-center">
+        <span>📤 Offline Outbox Queue</span>
+        <span class="badge badge-primary" id="hub-outbox-badge">0 Pending</span>
+      </div>
+      <div class="card-body">
+        <p class="text-sm text-muted mb-3">
+          Any quizzes you take or lessons you complete while offline are stored safely on this device. When you bring your device back near the school Wi-Fi or hotspot, tap sync below.
+        </p>
+        <button id="manual-sync-btn" onclick="triggerManualSync()" class="btn btn-success btn-block">
+          🔄 Sync Outbox to School Hub Now
+        </button>
+      </div>
+      <div class="card-footer">
+        <span class="text-xs text-muted">Auto-sync runs automatically whenever connected to the hub.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Outbox Items List -->
+  <div class="card mb-4">
+    <div class="card-header">
+      <span>📋 Items Pending Upload in Outbox</span>
+    </div>
+    <div class="card-body" style="padding: 0;">
+      <div id="outbox-list-container" style="padding: 1rem;">
+        <p class="text-muted text-sm text-center">Loading outbox records...</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rural School Tech Tips -->
+  <div class="card mb-4">
+    <div class="card-header">
+      <span>💡 How Offline Learning Works in Rural Schools</span>
+    </div>
+    <div class="card-body">
+      <div class="grid grid-cols-3" style="gap: 1rem;">
+        <div>
+          <strong class="text-sm">1. At School (Hub Connected)</strong>
+          <p class="text-xs text-muted mt-1">Connect your phone or laptop to the teacher's Wi-Fi hotspot. Open Offline LMS and tap "Download All Courses".</p>
+        </div>
+        <div>
+          <strong class="text-sm">2. At Home (Zero Internet)</strong>
+          <p class="text-xs text-muted mt-1">Open Offline LMS anytime. Read lessons, take quizzes, and track your streaks. Submissions are saved locally.</p>
+        </div>
+        <div>
+          <strong class="text-sm">3. Return & Sync</strong>
+          <p class="text-xs text-muted mt-1">When back in school, connect to the local Wi-Fi. All your scores and completions sync in seconds!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  async function refreshHubView() {
+    // 1. Check cached subjects count
+    const subjects = await BeaconDB.getAllSubjects();
+    const countEl = document.getElementById('offline-subjects-count');
+    if (countEl) {
+      countEl.textContent = subjects.length > 0 ? `💾 ${subjects.length} subjects cached locally` : 'No courses cached locally yet';
+    }
+
+    // 2. Check outbox
+    const items = await BeaconDB.getPendingOutbox();
+    const badge = document.getElementById('hub-outbox-badge');
+    if (badge) badge.textContent = `${items.length} Pending`;
+
+    const listContainer = document.getElementById('outbox-list-container');
+    if (listContainer) {
+      if (items.length === 0) {
+        listContainer.innerHTML = '<p class="text-muted text-sm text-center">🎉 Outbox is empty. All your offline work is synchronized with the school server!</p>';
+      } else {
+        let html = '<div class="table-responsive"><table class="table"><thead><tr><th>Item Type</th><th>Details</th><th>Recorded At</th><th>Status</th></tr></thead><tbody>';
+        items.forEach(item => {
+          html += `
+            <tr>
+              <td><strong>${item.type === 'submission' ? '📝 Quiz Result' : '✓ Lesson Completion'}</strong></td>
+              <td>${item.type === 'submission' ? `Score: ${item.data.score}/${item.data.total_points} (${item.data.percentage}%)` : `Lesson ID: ${item.data.lesson_id}`}</td>
+              <td class="text-xs text-muted">${new Date(item.timestamp).toLocaleString()}</td>
+              <td><span class="badge badge-warning">Waiting for Hub</span></td>
+            </tr>
+          `;
+        });
+        html += '</tbody></table></div>';
+        listContainer.innerHTML = html;
+      }
+    }
+  }
+
+  async function startCurriculumDownload() {
+    const btn = document.getElementById('download-curriculum-btn');
+    const progress = document.getElementById('download-progress-text');
+    btn.disabled = true;
+    progress.style.display = 'block';
+
+    const result = await BeaconSync.downloadCurriculumForOffline((msg) => {
+      progress.textContent = msg;
+    });
+
+    if (result.success) {
+      showToast('All subjects downloaded successfully for offline use!', 'success');
+      refreshHubView();
+    } else {
+      showToast('Download failed: ' + result.error, 'danger');
+    }
+    btn.disabled = false;
+  }
+
+  async function triggerManualSync() {
+    const btn = document.getElementById('manual-sync-btn');
+    btn.disabled = true;
+    btn.textContent = 'Syncing...';
+    
+    await BeaconSync.flushOutbox();
+    await refreshHubView();
+    
+    btn.disabled = false;
+    btn.textContent = '🔄 Sync Outbox to School Hub Now';
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    refreshHubView();
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}Home - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 960px; margin-top: 2rem;">
+  <section class="card">
+    <div class="card-body" style="padding: 2rem;">
+      <p class="text-sm text-muted">{{ tagline }}</p>
+      <h1 style="font-size: 2rem; margin: 0.5rem 0;">Welcome to {{ app_name }}</h1>
+      <p>Access lessons, textbooks, and quizzes through your school's local learning system, even when internet access is unavailable.</p>
+      <div class="d-flex gap-1 mt-4">
+        {% if session.get('user_id') %}
+          <a href="{% if session.get('role') in ['teacher', 'admin'] %}{{ url_for('teacher.dashboard') }}{% else %}{{ url_for('student.dashboard') }}{% endif %}" class="btn btn-primary">Go to Dashboard</a>
+        {% else %}
+          <a href="{{ url_for('auth.login') }}" class="btn btn-primary">Sign In</a>
+          <a href="{{ url_for('auth.register') }}" class="btn btn-secondary">Create an Account</a>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
+  <div class="grid grid-cols-3 mt-4">
+    <section class="card">
+      <div class="card-body">
+        <h2 class="mb-1">Learn offline</h2>
+        <p class="text-sm text-muted">Open lessons and take quizzes using your school's local network.</p>
+      </div>
+    </section>
+    <section class="card">
+      <div class="card-body">
+        <h2 class="mb-1">Explore textbooks</h2>
+        <p class="text-sm text-muted">Find available digital learning materials in the textbook library.</p>
+      </div>
+    </section>
+    <section class="card">
+      <div class="card-body">
+        <h2 class="mb-1">Stay in sync</h2>
+        <p class="text-sm text-muted">Learning progress can sync when devices reconnect to the school hub.</p>
+      </div>
+    </section>
+  </div>
+</div>
+{% endblock %}

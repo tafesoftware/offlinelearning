@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}New Subject - Offline LMS{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 600px;">
+  <div class="mb-3">
+    <a href="{{ url_for('teacher.dashboard') }}" class="text-sm text-muted">&larr; Back to Teacher Hub</a>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h2>Create New Subject</h2>
+    </div>
+    <div class="card-body">
+      <form method="POST" action="{{ url_for('teacher.new_subject') }}">
+        <div class="form-group">
+          <label class="form-label" for="title">Subject Title</label>
+          <input type="text" id="title" name="title" class="form-control" placeholder="e.g. Environmental Science & Sanitation" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="code">Subject Code (Short Identifier)</label>
+          <input type="text" id="code" name="code" class="form-control" placeholder="e.g. SCI-501" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="grade_level">Grade / Target Level</label>
+          <select id="grade_level" name="grade_level" class="form-control">
+            <option value="Grade 4">Grade 4</option>
+            <option value="Grade 5" selected>Grade 5</option>
+            <option value="Grade 6">Grade 6</option>
+            <option value="Grade 7">Grade 7</option>
+            <option value="Grade 8">Grade 8</option>
+            <option value="Secondary Form 1">Secondary Form 1</option>
+            <option value="All Levels">All Levels</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="description">Description & Learning Outcomes</label>
+          <textarea id="description" name="description" class="form-control" rows="3" placeholder="Explain what students will learn in this subject..."></textarea>
+        </div>
+
+        <div class="d-flex justify-between align-center mt-4">
+          <a href="{{ url_for('teacher.dashboard') }}" class="btn btn-secondary">Cancel</a>
+          <button type="submit" class="btn btn-primary">Save Subject</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

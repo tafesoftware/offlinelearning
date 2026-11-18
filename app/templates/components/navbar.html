@@ -1,0 +1,35 @@
+<header class="navbar">
+  <div class="nav-container">
+    <a href="{% if session.get('role') in ['teacher', 'admin'] %}{{ url_for('teacher.dashboard') }}{% else %}{{ url_for('student.dashboard') }}{% endif %}" class="brand">
+      <img src="{{ url_for('static', filename='icons/ministry-of-education.png') }}" alt="Ethiopian Ministry of Education logo" class="brand-icon">
+      <span>Offline LMS</span>
+    </a>
+
+    <div class="d-flex align-center gap-2">
+      <nav class="nav-links">
+        <a href="{{ url_for('pages.home') }}" class="nav-link">Home</a>
+        <a href="{{ url_for('pages.contact') }}" class="nav-link">Contact Us</a>
+        <a href="{{ url_for('pages.location') }}" class="nav-link">Location</a>
+        <a href="{{ url_for('pages.about') }}" class="nav-link">About System</a>
+        <a href="{{ url_for('library.index') }}" class="nav-link" style="color: var(--primary); font-weight: 600;">📚 Textbooks (9–12)</a>
+        {% if session.get('user_id') %}
+          {% if session.get('role') in ['teacher', 'admin'] %}
+            <a href="{{ url_for('teacher.dashboard') }}" class="nav-link">Teacher Hub</a>
+            <a href="{{ url_for('teacher.gradebook') }}" class="nav-link">Gradebook</a>
+            <a href="{{ url_for('sync.index') }}" class="nav-link">Sneakernet & Sync</a>
+          {% else %}
+            <a href="{{ url_for('student.dashboard') }}" class="nav-link">My Courses</a>
+            <a href="{{ url_for('student.offline_center') }}" class="nav-link">Offline Hub</a>
+          {% endif %}
+          <span class="text-sm text-muted" style="border-left: 1px solid var(--border); padding-left: 0.75rem;">
+            {{ session.get('full_name', session.get('username')) }} ({{ session.get('role')|capitalize }})
+          </span>
+          <a href="{{ url_for('auth.logout') }}" class="btn btn-secondary text-sm" style="padding: 0.3rem 0.6rem;">Logout</a>
+        {% else %}
+          <a href="{{ url_for('auth.login') }}" class="nav-link">Login</a>
+          <a href="{{ url_for('auth.register') }}" class="btn btn-primary text-sm">Register</a>
+        {% endif %}
+      </nav>
+    </div>
+  </div>
+</header>

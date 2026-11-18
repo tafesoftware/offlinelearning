@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% block title %}Student Dashboard - Offline LMS{% endblock %}
+
+{% block content %}
+<div class="container">
+  <!-- Welcome Banner -->
+  <div class="card mb-4" style="background: linear-gradient(135deg, #0284c7, #075985); color: #fff;">
+    <div class="card-body d-flex justify-between align-center" style="flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <h1 style="font-size: 1.6rem;">Hello, {{ user.full_name }}! 👋</h1>
+        <p style="opacity: 0.9;" class="text-sm">Enrolled in <strong>{{ user.grade_level }}</strong> &bull; Completed <strong>{{ total_completed }}</strong> lessons</p>
+      </div>
+      <div>
+        <a href="{{ url_for('student.offline_center') }}" class="btn btn-secondary" style="background:#fff; color:var(--primary); font-weight:700;">
+          📥 Download Lessons for Home Study
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Learning Milestones Badges -->
+  <div class="card mb-4">
+    <div class="card-header">
+      <span>🏆 Learning Achievements & Badges</span>
+    </div>
+    <div class="card-body">
+      <div class="grid grid-cols-4" style="gap: 1rem;">
+        {% for b in badges %}
+          <div style="text-align:center; padding: 0.75rem; border: 1px solid var(--border); border-radius: var(--radius-sm); background: {% if b.earned %}var(--primary-light){% else %}var(--bg-main){% endif %}; opacity: {% if b.earned %}1{% else %}0.5{% endif %};">
+            <div style="font-size: 1.8rem;">
+              {% if b.icon == 'star' %}⭐{% elif b.icon == 'book-open' %}📚{% elif b.icon == 'award' %}🏅{% else %}📲{% endif %}
+            </div>
+            <strong class="text-sm" style="display:block; margin-top:0.3rem;">{{ b.name }}</strong>
+            <span class="text-xs text-muted" style="font-size:0.75rem;">{{ b.desc }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <h2 class="mb-3">📚 Your Subjects</h2>
+  <div class="grid grid-cols-2 mb-4">
+    {% for s in subjects %}
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <span class="badge badge-primary">{{ s.code }}</span>
+            <span class="badge badge-secondary">{{ s.grade_level }}</span>
+          </div>
+          <span class="text-sm font-weight-bold" style="font-weight:700; color:var(--primary);">
+            {{ s.progress_pct }}% Done
+          </span>
+        </div>
+        <div class="card-body">
+          <h3 class="mb-1">{{ s.title }}</h3>
+          <p class="text-muted text-sm mb-3">{{ s.description or 'Core rural curriculum modules and interactive quizzes.' }}</p>
+          
+          <div class="d-flex justify-between text-sm text-muted mb-1">
+            <span>Lessons Completed</span>
+            <span><strong>{{ s.completed_lessons }}</strong> / {{ s.total_lessons }}</span>
+          </div>
+          <div class="progress-bar-container">
+            <div class="progress-bar {% if s.progress_pct == 100 %}success{% endif %}" style="width: {{ s.progress_pct }}%;"></div>
+          </div>
+        </div>
+        <div class="card-footer d-flex justify-between align-center">
+          <span class="text-xs text-muted">{{ s.total_lessons }} Lessons</span>
+          <a href="{{ url_for('student.subject_detail', subject_id=s.id) }}" class="btn btn-primary text-sm">Open Subject &rarr;</a>
+        </div>
+      </div>
+    {% else %}
+      <div class="card" style="grid-column: 1 / -1; padding: 2rem; text-align: center;">
+        <p class="text-muted">No subjects currently available. Ask your teacher to import the curriculum pack.</p>
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- Recent Quiz Submissions -->
+  {% if recent_quizzes %}
+    <div class="card mb-4">
+      <div class="card-header">
+        <span>📝 Recent Quiz Results</span>
+      </div>
+      <div class="card-body" style="padding: 0;">
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Quiz</th>
+                <th>Subject</th>
+                <th>Score</th>
+                <th>Result</th>
+                <th>Sync Mode</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for q in recent_quizzes %}
+                <tr>
+                  <td><strong>{{ q.quiz_title }}</strong></td>
+                  <td>{{ q.subject_title }}</td>
+                  <td>{{ q.score }} / {{ q.total_points }} ({{ q.percentage }}%)</td>
+                  <td>
+                    {% if q.passed %}
+                      <span class="badge badge-success">Passed</span>
+                    {% else %}
+                      <span class="badge badge-warning">Needs Review</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if q.submitted_offline %}
+                      <span class="badge badge-secondary" title="Submitted offline, synced via sneakernet/LAN">💾 Offline Synced</span>
+                    {% else %}
+                      <span class="badge badge-primary">🌐 Direct Hub</span>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

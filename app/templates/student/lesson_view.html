@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+{% block title %}{{ lesson.title }} - Offline LMS{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 860px;">
+  <div class="mb-3 d-flex justify-between align-center">
+    <a href="{{ url_for('student.subject_detail', subject_id=lesson.subject_id) }}" class="text-sm text-muted">
+      &larr; Back to {{ lesson.subject_title }}
+    </a>
+    <span class="text-sm text-muted">Lesson {{ lesson.order_num }} &bull; ~{{ lesson.estimated_minutes }} mins</span>
+  </div>
+
+  <div class="card mb-4">
+    <div class="card-header d-flex justify-between align-center">
+      <div>
+        <span class="badge badge-primary">{{ lesson.subject_title }}</span>
+      </div>
+      <div>
+        {% if lesson.is_completed %}
+          <button id="complete-lesson-btn" class="btn btn-success text-sm" disabled>✓ Lesson Completed</button>
+        {% else %}
+          <button id="complete-lesson-btn" onclick="markLessonComplete({{ lesson.id }})" class="btn btn-primary text-sm">
+            Mark as Completed
+          </button>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card-body">
+      <h1 class="mb-2" style="font-size: 1.8rem;">{{ lesson.title }}</h1>
+      {% if lesson.summary %}
+        <div style="background: var(--primary-light); border-left: 4px solid var(--primary); padding: 0.75rem 1rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem;">
+          <strong>Core Concept:</strong> {{ lesson.summary }}
+        </div>
+      {% endif %}
+
+      <!-- Audio guide simulation for low-literacy / audio-first rural education -->
+      <div class="card mb-4" style="background: var(--bg-main); border: 1px dashed var(--border);">
+        <div class="card-body d-flex align-center justify-between" style="padding: 0.75rem 1rem;">
+          <div class="d-flex align-center gap-1">
+            <span style="font-size: 1.4rem;">🎧</span>
+            <div>
+              <strong class="text-sm">Audio Lesson Overview</strong>
+              <p class="text-xs text-muted">Listen to teacher summary (ideal for low-light or audio review)</p>
+            </div>
+          </div>
+          <button onclick="toggleAudioDemo(this)" class="btn btn-secondary text-sm" style="padding: 0.3rem 0.6rem;">
+            ▶ Play Audio Summary
+          </button>
+        </div>
+      </div>
+
+      <!-- Lesson Body -->
+      <div class="lesson-body">
+        {# Simple, safe rendering of lesson content #}
+        {% for paragraph in lesson.content_markdown.split('\n\n') %}
+          {% if paragraph.startswith('### ') %}
+            <h3>{{ paragraph[4:] }}</h3>
+          {% elif paragraph.startswith('## ') %}
+            <h2>{{ paragraph[3:] }}</h2>
+          {% elif paragraph.startswith('# ') %}
+            <h1>{{ paragraph[2:] }}</h1>
+          {% elif paragraph.startswith('- ') or paragraph.startswith('* ') %}
+            <ul>
+              {% for line in paragraph.split('\n') %}
+                {% if line.strip() %}
+                  <li>{{ line.lstrip('*- ') }}</li>
+                {% endif %}
+              {% endfor %}
+            </ul>
+          {% elif paragraph.startswith('> ') %}
+            <blockquote>{{ paragraph[2:] }}</blockquote>
+          {% else %}
+            <p>{{ paragraph }}</p>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Linked Quizzes for this lesson -->
+    {% if quizzes %}
+      <div class="card-footer" style="background: var(--primary-light); border-top: 1px solid var(--border);">
+        <div class="d-flex justify-between align-center">
+          <div>
+            <strong>Check your understanding:</strong>
+            <p class="text-xs text-muted">Complete the lesson quiz to test what you have learned.</p>
+          </div>
+          {% for q in quizzes %}
+            <a href="{{ url_for('student.quiz_view', quiz_id=q.id) }}" class="btn btn-primary text-sm">
+              Take Quiz: {{ q.title }} &rarr;
+            </a>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Lesson Navigation Footer -->
+  <div class="d-flex justify-between align-center mb-4">
+    {% if prev_lesson %}
+      <a href="{{ url_for('student.lesson_view', lesson_id=prev_lesson.id) }}" class="btn btn-secondary text-sm">
+        &larr; Previous: {{ prev_lesson.title }}
+      </a>
+    {% else %}
+      <div></div>
+    {% endif %}
+
+    {% if next_lesson %}
+      <a href="{{ url_for('student.lesson_view', lesson_id=next_lesson.id) }}" class="btn btn-primary text-sm">
+        Next: {{ next_lesson.title }} &rarr;
+      </a>
+    {% else %}
+      <a href="{{ url_for('student.subject_detail', subject_id=lesson.subject_id) }}" class="btn btn-success text-sm">
+        Finish Module &rarr;
+      </a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  let isPlayingAudio = false;
+  let synthUtterance = null;
+
+  function toggleAudioDemo(btn) {
+    if (!('speechSynthesis' in window)) {
+      showToast('Text-to-speech audio is not supported on this browser.', 'warning');
+      return;
+    }
+
+    if (isPlayingAudio) {
+      window.speechSynthesis.cancel();
+      isPlayingAudio = false;
+      btn.innerHTML = '▶ Play Audio Summary';
+    } else {
+      const summaryText = {{ lesson.summary|tojson }} || {{ lesson.title|tojson }};
+      synthUtterance = new SpeechSynthesisUtterance(summaryText);
+      synthUtterance.rate = 0.9; // Slightly slower, clear for young learners
+      
+      synthUtterance.onend = () => {
+        isPlayingAudio = false;
+        btn.innerHTML = '▶ Play Audio Summary';
+      };
+
+      synthUtterance.onerror = () => {
+        isPlayingAudio = false;
+        btn.innerHTML = '▶ Play Audio Summary';
+      };
+
+      window.speechSynthesis.speak(synthUtterance);
+      isPlayingAudio = true;
+      btn.innerHTML = '⏹ Stop Audio';
+    }
+  }
+</script>
+{% endblock %}

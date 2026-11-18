@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% block title %}Teacher Hub - Offline LMS{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="card mb-4" style="background: linear-gradient(135deg, #1e293b, #0f172a); color: #fff;">
+    <div class="card-body d-flex justify-between align-center" style="flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <h1 style="font-size: 1.8rem;">Teacher & School Admin Console</h1>
+        <p style="opacity: 0.8;" class="text-sm">Manage offline curriculum, student progress, and sneakernet synchronization</p>
+      </div>
+      <div class="d-flex gap-1">
+        <a href="{{ url_for('teacher.new_subject') }}" class="btn btn-primary text-sm">+ Add Subject</a>
+        <a href="{{ url_for('sync.index') }}" class="btn btn-secondary text-sm" style="background:#fff; color:#0f172a;">💾 Sneakernet Sync</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Key Statistics -->
+  <div class="grid grid-cols-4 mb-4">
+    <div class="card">
+      <div class="card-body">
+        <span class="text-xs text-muted">REGISTERED STUDENTS</span>
+        <h2 style="font-size: 2rem; color: var(--primary);" class="mt-1">{{ student_count }}</h2>
+      </div>
+    </div>
+    <div class="card-body card">
+      <span class="text-xs text-muted">ACTIVE SUBJECTS</span>
+      <h2 style="font-size: 2rem; color: var(--success);" class="mt-1">{{ subject_count }}</h2>
+    </div>
+    <div class="card-body card">
+      <span class="text-xs text-muted">TOTAL LESSONS</span>
+      <h2 style="font-size: 2rem; color: var(--warning);" class="mt-1">{{ lesson_count }}</h2>
+    </div>
+    <div class="card-body card">
+      <span class="text-xs text-muted">QUIZ SUBMISSIONS</span>
+      <h2 style="font-size: 2rem; color: #8b5cf6;" class="mt-1">{{ submission_count }}</h2>
+    </div>
+  </div>
+
+  <!-- Subject Management Overview -->
+  <div class="card mb-4">
+    <div class="card-header d-flex justify-between align-center">
+      <span>📚 Course Subjects & Curriculum</span>
+      <a href="{{ url_for('teacher.new_subject') }}" class="btn btn-primary text-sm">+ New Subject</a>
+    </div>
+    <div class="card-body" style="padding: 0;">
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Subject Title</th>
+              <th>Grade</th>
+              <th>Lessons</th>
+              <th>Quizzes</th>
+              <th style="text-align: right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in subjects %}
+              <tr>
+                <td><span class="badge badge-primary">{{ s.code }}</span></td>
+                <td><strong>{{ s.title }}</strong></td>
+                <td><span class="badge badge-secondary">{{ s.grade_level }}</span></td>
+                <td>{{ s.lesson_count }}</td>
+                <td>{{ s.quiz_count }}</td>
+                <td style="text-align: right;">
+                  <a href="{{ url_for('student.subject_detail', subject_id=s.id) }}" class="btn btn-secondary text-sm" style="padding: 0.25rem 0.6rem;">View</a>
+                  <a href="{{ url_for('teacher.new_lesson', subject_id=s.id) }}" class="btn btn-primary text-sm" style="padding: 0.25rem 0.6rem;">+ Lesson</a>
+                </td>
+              </tr>
+            {% else %}
+              <tr>
+                <td colspan="6" class="text-center text-muted" style="padding: 2rem;">
+                  No subjects created yet. Click "+ New Subject" or import a curriculum pack.
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Submissions -->
+  {% if recent_submissions %}
+    <div class="card mb-4">
+      <div class="card-header d-flex justify-between align-center">
+        <span>📈 Recent Student Quiz Activity</span>
+        <a href="{{ url_for('teacher.gradebook') }}" class="text-sm">View Full Gradebook &rarr;</a>
+      </div>
+      <div class="card-body" style="padding: 0;">
+        <div class="table-responsive">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Quiz</th>
+                <th>Score</th>
+                <th>Result</th>
+                <th>Origin</th>
+                <th>Time</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for sub in recent_submissions %}
+                <tr>
+                  <td><strong>{{ sub.student_name }}</strong></td>
+                  <td>{{ sub.quiz_title }}</td>
+                  <td>{{ sub.score }} / {{ sub.total_points }} ({{ sub.percentage }}%)</td>
+                  <td>
+                    {% if sub.passed %}
+                      <span class="badge badge-success">Passed</span>
+                    {% else %}
+                      <span class="badge badge-warning">Needs Review</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if sub.submitted_offline %}
+                      <span class="badge badge-secondary">💾 Offline Synced</span>
+                    {% else %}
+                      <span class="badge badge-primary">🌐 Direct Hub</span>
+                    {% endif %}
+                  </td>
+                  <td class="text-xs text-muted">{{ sub.synced_at }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,57 @@
+{
+  "pack_title": "Ministry of Education - Term 1 Rural STEM Pack",
+  "beacon_version": "1.0.0",
+  "created_at": "2026-11-18T00:00:00Z",
+  "data": {
+    "subjects": [
+      {
+        "title": "Renewable Energy & Solar In Rural Homes",
+        "code": "ENG-505",
+        "grade_level": "Grade 5 & 6",
+        "description": "Understanding solar panels, battery care, and energy conservation in rural homesteads.",
+        "icon": "zap",
+        "lessons": [
+          {
+            "title": "How Solar Photovoltaic Panels Work",
+            "order_num": 1,
+            "content_markdown": "# Solar Power in Rural Communities\n\nSolar power transforms abundant sunlight into clean electricity for lighting, phone charging, and school computers.\n\n## Key Components of a Home Solar System\n1. **Solar PV Panel:** Placed facing direct sunlight without shade. Cleans easily with a damp cloth.\n2. **Solar Charge Controller:** Protects the battery from overcharging during bright midday sun.\n3. **Battery (Storage):** Stores energy for evening use.\n4. **Inverter / Direct 12V DC Appliances:** LED lamps and radios run directly on efficient DC power.\n\n> **Maintenance Tip:** Dust and bird droppings on a solar panel can reduce energy production by up to 40%. Wipe panels clean every morning.",
+            "summary": "Learn how solar panels, charge controllers, and batteries generate off-grid electricity for rural homes and schools.",
+            "estimated_minutes": 15,
+            "quizzes": [
+              {
+                "title": "Solar Energy Comprehension",
+                "passing_score": 70,
+                "questions": [
+                  {
+                    "question_text": "What is the primary role of a solar charge controller?",
+                    "options": [
+                      "To make sunlight brighter",
+                      "To prevent the storage battery from overcharging or deep draining",
+                      "To cool the roof",
+                      "To replace the solar panel"
+                    ],
+                    "correct_option_index": 1,
+                    "explanation": "A charge controller regulates voltage from panels to protect batteries from damage.",
+                    "points": 10
+                  },
+                  {
+                    "question_text": "How often should dust and soot be cleaned from solar panel glass in dusty rural areas?",
+                    "options": [
+                      "Once every 10 years",
+                      "Regularly with a clean damp cloth",
+                      "Never, dust does not affect solar output",
+                      "Only when it rains"
+                    ],
+                    "correct_option_index": 1,
+                    "explanation": "Dust blocks photons of light from reaching silicon solar cells, significantly lowering electricity generated.",
+                    "points": 10
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
