@@ -7,27 +7,32 @@
 
     <div class="d-flex align-center gap-2">
       <nav class="nav-links">
-        <a href="{{ url_for('pages.home') }}" class="nav-link">Home</a>
-        <a href="{{ url_for('pages.contact') }}" class="nav-link">Contact Us</a>
-        <a href="{{ url_for('pages.location') }}" class="nav-link">Location</a>
-        <a href="{{ url_for('pages.about') }}" class="nav-link">About System</a>
-        <a href="{{ url_for('library.index') }}" class="nav-link" style="color: var(--primary); font-weight: 600;">📚 Textbooks (9–12)</a>
+        <form class="language-switch" method="POST" action="{{ url_for('set_language') }}" aria-label="Language">
+          <input type="hidden" name="next" value="{{ request.full_path }}">
+          <button type="submit" name="language" value="en" aria-pressed="{{ 'true' if current_language == 'en' else 'false' }}">En</button>
+          <button type="submit" name="language" value="am" lang="am" aria-pressed="{{ 'true' if current_language == 'am' else 'false' }}">Am</button>
+        </form>
+        <a href="{{ url_for('pages.home') }}" class="nav-link">Home{% if is_registration_page %} / <span lang="am">መነሻ</span>{% endif %}</a>
+        <a href="{{ url_for('pages.contact') }}" class="nav-link">Contact Us{% if is_registration_page %} / <span lang="am">ያግኙን</span>{% endif %}</a>
+        <a href="{{ url_for('pages.location') }}" class="nav-link">Location{% if is_registration_page %} / <span lang="am">አድራሻ</span>{% endif %}</a>
+        <a href="{{ url_for('pages.about') }}" class="nav-link">About System{% if is_registration_page %} / <span lang="am">ስለ ስርዓቱ</span>{% endif %}</a>
+        <a href="{{ url_for('library.index') }}" class="nav-link" style="color: var(--primary); font-weight: 600;">📚 Textbooks (9–12){% if is_registration_page %} / <span lang="am">የመማሪያ መጻሕፍት</span>{% endif %}</a>
         {% if session.get('user_id') %}
           {% if session.get('role') in ['teacher', 'admin'] %}
-            <a href="{{ url_for('teacher.dashboard') }}" class="nav-link">Teacher Hub</a>
-            <a href="{{ url_for('teacher.gradebook') }}" class="nav-link">Gradebook</a>
-            <a href="{{ url_for('sync.index') }}" class="nav-link">Sneakernet & Sync</a>
+            <a href="{{ url_for('teacher.dashboard') }}" class="nav-link">Teacher Hub{% if is_registration_page %} / <span lang="am">የመምህራን ማዕከል</span>{% endif %}</a>
+            <a href="{{ url_for('teacher.gradebook') }}" class="nav-link">Gradebook{% if is_registration_page %} / <span lang="am">የውጤት መዝገብ</span>{% endif %}</a>
+            <a href="{{ url_for('sync.index') }}" class="nav-link">Sneakernet & Sync{% if is_registration_page %} / <span lang="am">የመረጃ ማመሳሰል</span>{% endif %}</a>
           {% else %}
-            <a href="{{ url_for('student.dashboard') }}" class="nav-link">My Courses</a>
-            <a href="{{ url_for('student.offline_center') }}" class="nav-link">Offline Hub</a>
+            <a href="{{ url_for('student.dashboard') }}" class="nav-link">My Courses{% if is_registration_page %} / <span lang="am">የእኔ ትምህርቶች</span>{% endif %}</a>
+            <a href="{{ url_for('student.offline_center') }}" class="nav-link">Offline Hub{% if is_registration_page %} / <span lang="am">ከመስመር ውጭ ማዕከል</span>{% endif %}</a>
           {% endif %}
           <span class="text-sm text-muted" style="border-left: 1px solid var(--border); padding-left: 0.75rem;">
             {{ session.get('full_name', session.get('username')) }} ({{ session.get('role')|capitalize }})
           </span>
-          <a href="{{ url_for('auth.logout') }}" class="btn btn-secondary text-sm" style="padding: 0.3rem 0.6rem;">Logout</a>
+          <a href="{{ url_for('auth.logout') }}" class="btn btn-secondary text-sm" style="padding: 0.3rem 0.6rem;">Logout{% if is_registration_page %} / <span lang="am">ውጣ</span>{% endif %}</a>
         {% else %}
-          <a href="{{ url_for('auth.login') }}" class="nav-link">Login</a>
-          <a href="{{ url_for('auth.register') }}" class="btn btn-primary text-sm">Register</a>
+          <a href="{{ url_for('auth.login') }}" class="nav-link">Login{% if is_registration_page %} / <span lang="am">ይግቡ</span>{% endif %}</a>
+          <a href="{{ url_for('auth.register') }}" class="btn btn-primary text-sm">Register{% if is_registration_page %} / <span lang="am">ይመዝገቡ</span>{% endif %}</a>
         {% endif %}
       </nav>
     </div>

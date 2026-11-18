@@ -81,9 +81,10 @@ class BeaconLMSTestCase(unittest.TestCase):
         registration = self.client.get("/auth/register")
         option_positions = [
             registration.data.index(f'value="Grade {grade}"'.encode())
-            for grade in range(4, 13)
+            for grade in range(5, 13)
         ]
         self.assertEqual(option_positions, sorted(option_positions))
+        self.assertNotIn(b'value="Grade 4"', registration.data)
 
         with db_session() as conn:
             for grade in (10, 4, 9, 5):
@@ -117,19 +118,58 @@ class BeaconLMSTestCase(unittest.TestCase):
                 self.assertEqual(response.status_code, 200)
                 self.assertIn(expected_text, response.data)
 
+    def test_language_selection_persists_across_pages(self):
+        english_home = self.client.get("/home")
+        self.assertIn(b'<html lang="en">', english_home.data)
+
+        response = self.client.post(
+            "/language",
+            data={"language": "am", "next": "/home"},
+        )
+        self.assertEqual(response.status_code, 302)
+        amharic_home = self.client.get("/home")
+        self.assertIn(b'<html lang="am">', amharic_home.data)
+        self.assertIn(b"i18n.js", amharic_home.data)
+        self.assertIn(b'name="language" value="am" lang="am" aria-pressed="true"', amharic_home.data)
+
+        amharic_login = self.client.get("/auth/login")
+        self.assertIn(b'<html lang="am">', amharic_login.data)
+
+        response = self.client.post(
+            "/language",
+            data={"language": "en", "next": "/auth/login"},
+        )
+        self.assertEqual(response.status_code, 302)
+        english_login = self.client.get("/auth/login")
+        self.assertIn(b'<html lang="en">', english_login.data)
+
+        invalid_language = self.client.post(
+            "/language",
+            data={"language": "fr", "next": "/home"},
+        )
+        self.assertEqual(invalid_language.status_code, 400)
+
     def test_registration_streams_and_subject_preview(self):
         seed_grade_11_12_subject_catalog()
         registration = self.client.get("/auth/register")
         self.assertIn(b'id="stream"', registration.data)
+        self.assertIn(
+            '<option value="" selected disabled>Grade / ክፍል</option>'.encode(),
+            registration.data,
+        )
+        self.assertIn("አዲስ መለያ ይፍጠሩ".encode(), registration.data)
+        self.assertIn("መነሻ".encode(), registration.data)
+        self.assertIn("የገጠር እና ሩቅ ትምህርት ቤቶች".encode(), registration.data)
         self.assertIn(b"Biology", registration.data)
         self.assertIn(b"Geography", registration.data)
         self.assertNotIn(b"Student Textbook", registration.data)
+        self.assertNotIn("መነሻ".encode(), self.client.get("/auth/login").data)
 
         registrations = (
-            ("grade11_student", "student", "Grade 11", "Social Science"),
-            ("grade12_teacher", "teacher", "Grade 12", "Natural Science"),
+            ("grade11_student", "student", "Grade 11", "Social Science", "Grade 11", "Social Science"),
+            ("grade12_teacher", "teacher", "Grade 12", "Natural Science", "General", None),
         )
-        for username, role, grade, stream in registrations:
+        for username, role, grade, stream, expected_grade, expected_stream in registrations:
             response = self.client.post("/auth/register", data={
                 "first_name": "Test",
                 "last_name": username,
@@ -145,8 +185,8 @@ class BeaconLMSTestCase(unittest.TestCase):
                     "SELECT grade_level, stream FROM users WHERE username = ?",
                     (username,),
                 ).fetchone()
-                self.assertEqual(user["grade_level"], grade)
-                self.assertEqual(user["stream"], stream)
+                self.assertEqual(user["grade_level"], expected_grade)
+                self.assertEqual(user["stream"], expected_stream)
 
         response = self.client.post("/auth/register", data={
             "first_name": "Missing",
@@ -161,6 +201,37 @@ class BeaconLMSTestCase(unittest.TestCase):
             user = conn.execute(
                 "SELECT id FROM users WHERE username = ?",
                 ("missing_stream",),
+            ).fetchone()
+            self.assertIsNone(user)
+
+        response = self.client.post("/auth/register", data={
+            "first_name": "Missing",
+            "last_name": "Grade",
+            "username": "missing_grade",
+            "password": "test-password",
+            "role": "student",
+        })
+        self.assertEqual(response.status_code, 200)
+        with db_session() as conn:
+            user = conn.execute(
+                "SELECT id FROM users WHERE username = ?",
+                ("missing_grade",),
+            ).fetchone()
+            self.assertIsNone(user)
+
+        response = self.client.post("/auth/register", data={
+            "first_name": "Invalid",
+            "last_name": "Grade",
+            "username": "grade_four",
+            "password": "test-password",
+            "role": "student",
+            "grade_level": "Grade 4",
+        })
+        self.assertEqual(response.status_code, 200)
+        with db_session() as conn:
+            user = conn.execute(
+                "SELECT id FROM users WHERE username = ?",
+                ("grade_four",),
             ).fetchone()
             self.assertIsNone(user)
 

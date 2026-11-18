@@ -91,25 +91,50 @@ def register():
             full_name = f"{first_name} {last_name}".strip()
 
         role = request.form.get("role", "student")
-        grade_level = request.form.get("grade_level", "Grade 9")
-        stream = request.form.get("stream", "").strip()
+        if role == "teacher":
+            grade_level = "General"
+            stream = None
+        else:
+            grade_level = request.form.get("grade_level", "").strip()
+            stream = request.form.get("stream", "").strip()
         
         if not username or not password or not full_name:
-            flash("All fields including First Name and Last Name are required.", "warning")
+            flash(
+                "First name, last name, username and password are required. / "
+                "የመጀመሪያ ስም፣ የአባት ስም፣ የተጠቃሚ ስም እና የይለፍ ቃል ያስፈልጋሉ።",
+                "warning",
+            )
             return _render_registration()
 
-        if grade_level in ("Grade 11", "Grade 12"):
+        if role != "teacher" and grade_level not in {
+            f"Grade {grade}" for grade in range(5, 13)
+        }:
+            flash(
+                "Choose a grade before registering. / ከመመዝገብዎ በፊት ክፍል ይምረጡ።",
+                "warning",
+            )
+            return _render_registration()
+
+        if role != "teacher" and grade_level in ("Grade 11", "Grade 12"):
             if stream not in ("Natural Science", "Social Science"):
-                flash("Choose Natural Science or Social Science for Grades 11 and 12.", "warning")
+                flash(
+                    "For Grades 11 and 12, choose Natural Science or Social Science. / "
+                    "ለ11ኛ እና 12ኛ ክፍሎች ተፈጥሮ ሳይንስ ወይም ማህበራዊ ሳይንስ ይምረጡ።",
+                    "warning",
+                )
                 return _render_registration()
-        else:
+        elif role != "teacher":
             stream = None
             
         with db_session() as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT id FROM users WHERE username = ?", (username,))
             if cursor.fetchone():
-                flash("Username already exists. Please pick another.", "danger")
+                flash(
+                    "Username already exists. Please choose another. / "
+                    "ይህ የተጠቃሚ ስም አስቀድሞ ተይዟል። እባክዎ ሌላ ይምረጡ።",
+                    "danger",
+                )
                 return _render_registration()
                 
             pwd_hash = hash_password(password)
@@ -118,7 +143,11 @@ def register():
                 VALUES (?, ?, ?, ?, ?, ?)
             """, (username, pwd_hash, full_name, role, grade_level, stream))
             
-            flash("Account registered successfully! Please log in.", "success")
+            flash(
+                "Account registered successfully! Please log in. / "
+                "ምዝገባዎ በተሳካ ሁኔታ ተጠናቋል። እባክዎ ይግቡ።",
+                "success",
+            )
             return redirect(url_for("auth.login"))
             
     return _render_registration()

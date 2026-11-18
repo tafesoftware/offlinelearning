@@ -1,78 +1,78 @@
 {% extends 'base.html' %}
-{% block title %}Register - Offline LMS{% endblock %}
+{% block title %}Register / ይመዝገቡ - Offline LMS{% endblock %}
 
 {% block content %}
 <div class="container" style="max-width: 480px; margin-top: 2rem;">
   <div class="card">
     <div class="card-header text-center" style="display:block; padding: 1.5rem 1rem;">
-      <h2>Create Local Account</h2>
-      <p class="text-muted text-sm">Register to study or manage offline courses</p>
+      <h2>Create Local Account / <span lang="am">አዲስ መለያ ይፍጠሩ</span></h2>
+      <p class="text-muted text-sm">Register to study or manage offline courses / <span lang="am">ለመማር ወይም ከመስመር ውጭ ትምህርቶችን ለማስተዳደር ይመዝገቡ</span></p>
     </div>
     <div class="card-body">
       <form method="POST" action="{{ url_for('auth.register') }}">
         <div class="grid grid-cols-2" style="gap: 0.75rem;">
           <div class="form-group">
-            <label class="form-label" for="first_name">First Name</label>
-            <input type="text" id="first_name" name="first_name" class="form-control" placeholder="e.g. Samuel" required autofocus>
+            <label class="form-label" for="first_name">First Name / <span lang="am">የመጀመሪያ ስም</span></label>
+            <input type="text" id="first_name" name="first_name" class="form-control" placeholder="e.g. Samuel / ለምሳሌ: Samuel" required autofocus>
           </div>
           <div class="form-group">
-            <label class="form-label" for="last_name">Last Name</label>
-            <input type="text" id="last_name" name="last_name" class="form-control" placeholder="e.g. Kiptoo" required>
+            <label class="form-label" for="last_name">Last Name / <span lang="am">የአባት ስም</span></label>
+            <input type="text" id="last_name" name="last_name" class="form-control" placeholder="e.g. Kiptoo / ለምሳሌ: Kiptoo" required>
           </div>
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="username">Username or ID</label>
-          <input type="text" id="username" name="username" class="form-control" placeholder="e.g. samuel_k" required>
+          <label class="form-label" for="username">Username or ID / <span lang="am">የተጠቃሚ ስም ወይም መለያ ቁጥር</span></label>
+          <input type="text" id="username" name="username" class="form-control" placeholder="e.g. samuel_k / ለምሳሌ: samuel_k" required>
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="role">Role</label>
+          <label class="form-label" for="role">Role / <span lang="am">ሚና</span></label>
           <select id="role" name="role" class="form-control">
-            <option value="student" selected>Student</option>
-            <option value="teacher">Teacher</option>
+            <option value="student" selected>Student / ተማሪ</option>
+            <option value="teacher">Teacher / መምህር</option>
           </select>
         </div>
 
-        <div class="form-group">
-          <label class="form-label" for="grade_level">Grade / Class Level</label>
-          <select id="grade_level" name="grade_level" class="form-control">
-            <option value="Grade 4">Grade 4</option>
-            <option value="Grade 5">Grade 5</option>
-            <option value="Grade 6">Grade 6</option>
-            <option value="Grade 7">Grade 7</option>
-            <option value="Grade 8">Grade 8</option>
-            <option value="Grade 9" selected>Grade 9</option>
-            <option value="Grade 10">Grade 10</option>
-            <option value="Grade 11">Grade 11</option>
-            <option value="Grade 12">Grade 12</option>
+        <div class="form-group" id="grade-group">
+          <label class="form-label" for="grade_level">Grade / Class Level / <span lang="am">ክፍል / የመማሪያ ደረጃ</span></label>
+          <select id="grade_level" name="grade_level" class="form-control" required>
+            <option value="" selected disabled>Grade / ክፍል</option>
+            <option value="Grade 5">Grade 5 / 5ኛ ክፍል</option>
+            <option value="Grade 6">Grade 6 / 6ኛ ክፍል</option>
+            <option value="Grade 7">Grade 7 / 7ኛ ክፍል</option>
+            <option value="Grade 8">Grade 8 / 8ኛ ክፍል</option>
+            <option value="Grade 9">Grade 9 / 9ኛ ክፍል</option>
+            <option value="Grade 10">Grade 10 / 10ኛ ክፍል</option>
+            <option value="Grade 11">Grade 11 / 11ኛ ክፍል</option>
+            <option value="Grade 12">Grade 12 / 12ኛ ክፍል</option>
           </select>
         </div>
 
         <div class="form-group" id="stream-group" hidden>
-          <label class="form-label" for="stream">Grades 11-12 Field</label>
+          <label class="form-label" for="stream">Grades 11-12 Field / <span lang="am">የ11ኛ-12ኛ ክፍል የትምህርት ዘርፍ</span></label>
           <select id="stream" name="stream" class="form-control" disabled>
-            <option value="">Choose a field</option>
-            <option value="Natural Science">Natural Science</option>
-            <option value="Social Science">Social Science</option>
+            <option value="">Choose a field / ዘርፍ ይምረጡ</option>
+            <option value="Natural Science">Natural Science / ተፈጥሮ ሳይንስ</option>
+            <option value="Social Science">Social Science / ማህበራዊ ሳይንስ</option>
           </select>
         </div>
 
         <div class="form-group" id="subject-preview" hidden aria-live="polite">
-          <p class="form-label" id="subject-preview-label">Subjects for selected field</p>
+          <p class="form-label" id="subject-preview-label">Subjects for selected field / <span lang="am">ለተመረጠው ዘርፍ የሚገኙ ትምህርቶች</span></p>
           <ul id="stream-subject-list" style="margin-left: 1.25rem;"></ul>
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="password">Password / PIN</label>
-          <input type="password" id="password" name="password" class="form-control" placeholder="Create a password" required>
+          <label class="form-label" for="password">Password / PIN / <span lang="am">የይለፍ ቃል / ፒን</span></label>
+          <input type="password" id="password" name="password" class="form-control" placeholder="Create a password / የይለፍ ቃል ይፍጠሩ" required>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-block">Complete Registration</button>
+        <button type="submit" class="btn btn-primary btn-block">Complete Registration / <span lang="am">ምዝገባውን ያጠናቅቁ</span></button>
       </form>
     </div>
     <div class="card-footer text-center">
-      <p class="text-sm">Already have an account? <a href="{{ url_for('auth.login') }}">Sign In</a></p>
+      <p class="text-sm">Already have an account? / <span lang="am">መለያ አለዎት?</span> <a href="{{ url_for('auth.login') }}">Sign In / ይግቡ</a></p>
     </div>
   </div>
 </div>
@@ -81,6 +81,8 @@
 {% block scripts %}
 <script>
   (() => {
+    const roleSelect = document.getElementById('role');
+    const gradeGroup = document.getElementById('grade-group');
     const gradeLevel = document.getElementById('grade_level');
     const streamGroup = document.getElementById('stream-group');
     const streamSelect = document.getElementById('stream');
@@ -88,10 +90,30 @@
     const subjectPreviewLabel = document.getElementById('subject-preview-label');
     const subjectList = document.getElementById('stream-subject-list');
     const subjects = {{ registration_subjects|tojson }};
+    const currentLanguage = {{ current_language|tojson }};
+    const streamNamesAmharic = {
+      'Natural Science': 'ተፈጥሮ ሳይንስ',
+      'Social Science': 'ማህበራዊ ሳይንስ'
+    };
+    const subjectNamesAmharic = {
+      'Mathematics': 'ሒሳብ',
+      'Physics': 'ፊዚክስ',
+      'Chemistry': 'ኬሚስትሪ',
+      'Biology': 'ባዮሎጂ',
+      'Information Technology': 'ኢንፎርሜሽን ቴክኖሎጂ',
+      'Geography': 'ጂኦግራፊ',
+      'History': 'ታሪክ',
+      'Economics': 'ኢኮኖሚክስ',
+      'Civics & Ethical Education': 'ዜግነት እና ሥነ ምግባር ትምህርት',
+      'English': 'እንግሊዝኛ'
+    };
 
     function updateStreamSubjects() {
+      const isStudent = roleSelect.value === 'student';
+      gradeGroup.hidden = !isStudent;
+      gradeLevel.disabled = !isStudent;
       const grade = gradeLevel.value;
-      const isSeniorGrade = grade === 'Grade 11' || grade === 'Grade 12';
+      const isSeniorGrade = isStudent && (grade === 'Grade 11' || grade === 'Grade 12');
       streamGroup.hidden = !isSeniorGrade;
       streamSelect.disabled = !isSeniorGrade;
       streamSelect.required = isSeniorGrade;
@@ -108,21 +130,34 @@
         subject.grade_level === grade &&
         (subject.stream === streamSelect.value || subject.stream === 'Common')
       );
-      subjectPreviewLabel.textContent = `${grade} ${streamSelect.value} subjects`;
+      const gradeNumber = grade.slice('Grade '.length);
+      subjectPreviewLabel.textContent = currentLanguage === 'am'
+        ? `${gradeNumber}ኛ ክፍል - ${streamNamesAmharic[streamSelect.value]} ትምህርቶች`
+        : `Subjects for ${grade}, ${streamSelect.value}`;
       if (visibleSubjects.length === 0) {
         const item = document.createElement('li');
-        item.textContent = 'No subjects are available for this field yet.';
+        item.textContent = currentLanguage === 'am'
+          ? 'ለዚህ ዘርፍ እስካሁን ትምህርቶች አልተገኙም።'
+          : 'No subjects are available for this field yet.';
         subjectList.appendChild(item);
       } else {
         visibleSubjects.forEach(subject => {
           const item = document.createElement('li');
-          item.textContent = subject.name + (subject.stream === 'Common' ? ' (Common)' : '');
+          const subjectNameAmharic = subjectNamesAmharic[subject.name];
+          const subjectName = currentLanguage === 'am' && subjectNameAmharic
+            ? subjectNameAmharic
+            : subject.name;
+          const commonLabel = subject.stream === 'Common'
+            ? (currentLanguage === 'am' ? ' (የጋራ)' : ' (Common)')
+            : '';
+          item.textContent = subjectName + commonLabel;
           subjectList.appendChild(item);
         });
       }
       subjectPreview.hidden = false;
     }
 
+    roleSelect.addEventListener('change', updateStreamSubjects);
     gradeLevel.addEventListener('change', updateStreamSubjects);
     streamSelect.addEventListener('change', updateStreamSubjects);
     updateStreamSubjects();

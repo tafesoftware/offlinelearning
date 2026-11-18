@@ -1,4 +1,6 @@
-from flask import Flask, redirect, url_for, session
+from urllib.parse import urlsplit
+
+from flask import Flask, abort, redirect, request, session, url_for
 from app.config import Config
 from app.database import init_db
 from app.routes.auth_routes import bp as auth_bp
@@ -25,6 +27,24 @@ def create_app():
     app.register_blueprint(api_bp)
     app.register_blueprint(library_bp)
     app.register_blueprint(pages_bp)
+
+    @app.context_processor
+    def inject_language():
+        language = session.get("language", "en")
+        return {"current_language": language if language in ("en", "am") else "en"}
+
+    @app.route("/language", methods=["POST"])
+    def set_language():
+        language = request.form.get("language")
+        if language not in ("en", "am"):
+            abort(400)
+
+        session["language"] = language
+        target = request.form.get("next", "")
+        parsed_target = urlsplit(target)
+        if target.startswith("/") and not target.startswith("//") and not parsed_target.netloc:
+            return redirect(target)
+        return redirect(url_for("pages.home"))
 
     @app.route("/")
     def index():

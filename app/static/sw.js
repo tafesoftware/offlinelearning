@@ -1,4 +1,4 @@
-const CACHE_NAME = 'offline-lms-v1.0.1';
+const CACHE_NAME = 'offline-lms-v1.0.5';
 const ASSETS_TO_CACHE = [
   '/',
   '/auth/login',
@@ -6,6 +6,7 @@ const ASSETS_TO_CACHE = [
   '/student/offline-center',
   '/static/css/app.css',
   '/static/js/app.js',
+  '/static/js/i18n.js',
   '/static/js/db.js',
   '/static/js/sync.js',
   '/static/js/quiz.js',

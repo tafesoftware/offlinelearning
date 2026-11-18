@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ current_language }}">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -18,14 +18,15 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
 </head>
 <body>
+  {% set is_registration_page = request.endpoint == 'auth.register' %}
   <!-- PWA Install Banner -->
   <div id="pwa-install-banner" class="install-banner d-none">
     <div class="d-flex align-center gap-2">
       <img src="{{ url_for('static', filename='icons/icon-192.png') }}" width="24" height="24" alt="Ethiopian Ministry of Education">
-      <span><strong>Install Offline App:</strong> Learn anytime without internet!</span>
+      <span><strong>Install Offline App{% if is_registration_page %} / ከመስመር ውጭ መተግበሪያን ይጫኑ{% endif %}:</strong> Learn anytime without internet!{% if is_registration_page %} / ያለ ኢንተርኔት በማንኛውም ጊዜ ይማሩ!{% endif %}</span>
     </div>
     <div class="d-flex align-center gap-1">
-      <button onclick="triggerPWAInstall()" class="btn-install">Install App</button>
+      <button onclick="triggerPWAInstall()" class="btn-install">Install App{% if is_registration_page %} / ይጫኑ{% endif %}</button>
       <button onclick="document.getElementById('pwa-install-banner').classList.add('d-none')" style="background:none;border:none;color:#fff;font-size:1.2rem;cursor:pointer;padding:0 0.5rem;">&times;</button>
     </div>
   </div>
@@ -39,8 +40,8 @@
 
   <footer style="background-color:#ffffff;border-top:1px solid var(--border);padding:1.5rem 0;margin-top:2rem;text-align:center;">
     <div class="container text-muted text-sm">
-      <p><strong>Offline LMS</strong> &bull; Learning System for Rural & Remote Schools</p>
-      <p class="mt-2">Designed for zero-bandwidth classrooms, solar-powered labs, and sneakernet sync.</p>
+      <p><strong>Offline LMS</strong> &bull; Learning System for Rural & Remote Schools{% if is_registration_page %} / <span lang="am">የገጠር እና ሩቅ ትምህርት ቤቶች የመማሪያ ስርዓት</span>{% endif %}</p>
+      <p class="mt-2">Designed for zero-bandwidth classrooms, solar-powered labs, and sneakernet sync.{% if is_registration_page %} / <span lang="am">የኢንተርኔት ግንኙነት ለሌላቸው ክፍሎች፣ በፀሐይ ኃይል ለሚሰሩ ላቦራቶሪዎች እና ከመስመር ውጭ የመረጃ ማመሳሰል የተዘጋጀ።</span>{% endif %}</p>
     </div>
   </footer>
 
@@ -48,6 +49,7 @@
   <script src="{{ url_for('static', filename='js/db.js') }}"></script>
   <script src="{{ url_for('static', filename='js/sync.js') }}"></script>
   <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/i18n.js') }}"></script>
   {% block scripts %}{% endblock %}
 </body>
 </html>

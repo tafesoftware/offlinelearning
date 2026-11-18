@@ -26,7 +26,7 @@ Offline-First Learning Management System for Rural & Remote Areas :offline LMS i
    - Integrated text-to-speech audio reader summarizes key concepts for auditory learners and students developing reading fluency.
 
 6. **Grade 11-12 Stream Registration**:
-   - Students and teachers choose Natural Science or Social Science, then see the matching subjects and common subjects before completing registration.
+   - Students choose Natural Science or Social Science, then see the matching subjects and common subjects before completing registration. Teacher registrations do not show grade or stream fields.
 
 ---
 
